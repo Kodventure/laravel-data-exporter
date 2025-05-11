@@ -36,11 +36,6 @@ DataExporter::for(User::query())
 
 You can customize your exporter pipeline using builder classes, custom formatters, and DTOs. See the [docs](#) for more information.
 
-## 🧪 Testing
-
-```bash
-php artisan test
-```
 
 ## 📄 License
 
