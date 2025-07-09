@@ -1,0 +1,33 @@
+{
+    "authors": [
+      {
+        "name": "Hasan Civelek",
+        "email": "hasan@kodventure.com"
+      }
+    ],
+    "homepage": "https://github.com/kodventure/laravel-data-exporter",  
+    "name": "kodventure/laravel-data-exporter",
+    "description": "Export query results as CSV, XLSX, JSON etc. with support for pagination, filters, and selection.",
+    "type": "library",
+    "license": "MIT",    
+    "autoload": {
+      "psr-4": {
+        "Kodventure\\LaravelDataExporter\\": "src/"
+      }
+    },
+    "extra": {
+      "laravel": {
+        "providers": [
+          "Kodventure\\LaravelDataExporter\\Providers\\DataExporterServiceProvider"
+        ],
+        "aliases": {
+          "DataExporter": "Kodventure\\LaravelDataExporter\\Facades\\DataExporter"
+        }
+      }
+    },    
+    "require": {
+      "php": "^8.1",
+      "illuminate/support": "^10.0|^11.0",
+      "phpoffice/phpspreadsheet": "^4.2"
+    }
+}
