@@ -3,7 +3,7 @@
         'name' => 'kodventure/laravel-data-exporter',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => 'ffdea8ee36d8e1848bab3d4795b5f00a004e82e5',
+        'reference' => '3cff263db476064b2655113d6e99fe83852ce19c',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -85,7 +85,7 @@
         'kodventure/laravel-data-exporter' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => 'ffdea8ee36d8e1848bab3d4795b5f00a004e82e5',
+            'reference' => '3cff263db476064b2655113d6e99fe83852ce19c',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
