@@ -19,7 +19,7 @@ class XlsxExporter extends BaseExporter
 
         // Header yaz
         foreach ($headers as $col => $header) {
-            $sheet->setCellValueByColumnAndRow($col + 1, 1, $header);
+            $sheet->setCellValue([$col + 1, 1], $header);
         }
 
         // Satırları yaz
@@ -27,7 +27,7 @@ class XlsxExporter extends BaseExporter
         foreach ($rows as $row) {
             foreach ($headers as $col => $header) {
                 $value = $row[$header] ?? '';
-                $sheet->setCellValueByColumnAndRow($col + 1, $rowIndex, $value);
+                $sheet->setCellValue([$col + 1, $rowIndex], $value);
             }
             $rowIndex++;
         }
