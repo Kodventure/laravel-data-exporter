@@ -3,7 +3,6 @@
 namespace Kodventure\LaravelDataExporter\Services;
 
 use Kodventure\LaravelDataExporter\Jobs\HandleExportJob;
-use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Foundation\Bus\PendingDispatch;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -15,7 +14,6 @@ use Kodventure\LaravelDataExporter\DTO\RawSqlSourceDTO;
 use Kodventure\LaravelDataExporter\Factories\ExporterFactory;
 use Kodventure\LaravelDataExporter\Factories\ExportSourceFactory;
 use Kodventure\LaravelDataExporter\Notifications\ExportReadyNotification;
-use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Collection;
 use InvalidArgumentException;
@@ -37,7 +35,8 @@ class DataExporter
                 $user->notify(ExportReadyNotification::started($format));
             }
 
-            return App::make(Dispatcher::class)->dispatch(new HandleExportJob($exportSource, $exporter, $user));
+            return HandleExportJob::dispatch($exportSource, $exporter, $user);
+
         } else {
             return (new HandleExportJob($exportSource, $exporter, $user))->handle();
         }

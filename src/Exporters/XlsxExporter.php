@@ -23,8 +23,9 @@ class XlsxExporter extends BaseExporter
 
         $rowIndex = 2;
         foreach ($rows as $row) {
+            $rowData = $row instanceof \Illuminate\Contracts\Support\Arrayable ? $row->toArray() : (array) $row;
             foreach ($headers as $col => $header) {
-                $value = $this->normalizeCellValue($row[$header] ?? '');
+                $value = $this->normalizeCellValue($rowData[$header] ?? '');
                 $sheet->setCellValue([$col + 1, $rowIndex], $value);
             }
             $rowIndex++;

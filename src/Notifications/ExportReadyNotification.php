@@ -2,19 +2,18 @@
 
 namespace Kodventure\LaravelDataExporter\Notifications;
 
+use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Notifications\Messages\BroadcastMessage;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Foundation\Queue\Queueable;
 use Kodventure\LaravelDataExporter\DTO\ExportedFileDTO;
 use Kodventure\LaravelDataExporter\Enums\ExportFormat;
 
-class ExportReadyNotification extends Notification
+class ExportReadyNotification extends Notification implements ShouldBroadcast
 {
     use Queueable;
 
-    /**
-     * Create a new notification instance.
-     */
     public function __construct(
         public string $status,
         public ?string $name = null,
@@ -44,19 +43,11 @@ class ExportReadyNotification extends Notification
         );
     }
 
-    /**
-     * Get the notification's delivery channels.
-     *
-     * @return array<int, string>
-     */
     public function via(object $notifiable): array
     {
-        return ['database'];
+        return ['database', 'broadcast'];
     }
 
-    /**
-     * Get the mail representation of the notification.
-     */
     public function toMail(object $notifiable): MailMessage
     {
         $subject = $this->status === 'started'
@@ -78,81 +69,49 @@ class ExportReadyNotification extends Notification
         return $mail;
     }
 
+    public function toBroadcast(object $notifiable): BroadcastMessage
+    {
+        return new BroadcastMessage($this->toArray($notifiable));
+    }
+
     /**
-     * Get the array representation of the notification.
+     * Filament notification bell compatibility.
+     * Requires 'format' => 'filament' for Filament's DatabaseNotifications query filter.
      *
      * @return array<string, mixed>
      */
     public function toArray(object $notifiable): array
     {
-        return [
-            'status' => $this->status,
-            'message' => $this->status === 'started'
-                ? 'Export started'
-                : 'Export completed',
-            'file' => [
-                'name' => $this->name,
-                'format' => $this->format,
-                'downloadUrl' => $this->downloadUrl,
-                'temporaryUrl' => $this->temporaryUrl,
-                'size' => $this->size,
-            ],
+        if ($this->status === 'started') {
+            return [
+                'format' => 'filament',
+                'title'  => 'Export started',
+                'body'   => 'Your export request has been queued. You will be notified when the file is ready.',
+                'status' => 'info',
+            ];
+        }
+
+        $url = $this->temporaryUrl ?? $this->downloadUrl;
+
+        $data = [
+            'format' => 'filament',
+            'title'  => 'Export ready: ' . strtoupper((string) $this->format),
+            'body'   => 'Your export file is ready for download.' . ($this->name ? ' (' . $this->name . ')' : ''),
+            'status' => 'success',
         ];
+
+        if ($url) {
+            $data['actions'] = [
+                [
+                    'name'                  => 'download',
+                    'label'                 => 'Download',
+                    'url'                   => $url,
+                    'color'                 => 'success',
+                    'shouldOpenUrlInNewTab' => true,
+                ],
+            ];
+        }
+
+        return $data;
     }
-
-
-    
-
-    // public function toFilamentNotification($notifiable): FilamentFormat
-    // {
-    //
-    // FilamentNotification::make()
-    // ->title('Export dosyanız indirilmeye hazır')
-    // ->success()
-    // ->persistent()
-    // ->send();  
-    //
-    //     $url = url('/storage/' . $this->filename);
-    //     logger("to filament...");
-    //     return new FilamentFormat(
-    //         title: 'Export hazır',
-    //         body: 'Export dosyanız indirilmeye hazır.',
-    //         icon: 'heroicon-o-document-text',
-    //         iconColor: 'primary',
-    //         actions: [
-    //             [
-    //                 'name' => 'Dosyayı indir',
-    //                 'url' => $url,
-    //                 'color' => 'primary',
-    //             ],
-    //         ],
-    //     );
-    // }    
-
-    // public function toBroadcast($notifiable)
-    // {
-    //     $this->notifiable = $notifiable;
-
-    //     logger("to broadcast...");
-    //     return new BroadcastMessage(
-    //         $this->toFilamentNotification($notifiable)->toArray()
-    //     );
-    // }   
-
-    // public function broadcastOn(): Channel
-    // {
-    //     return new PrivateChannel('admin.'.$this->notifiable->id);
-    // }
-
-    // public function broadcastOn(): array
-    // {
-    //     return [
-    //         new Channel('system-maintenance'),
-    //     ];
-    // }
-
-    // public function broadcastAs(): string
-    // {
-    //     return 'SystemMaintenanceEvent'; // echo'nun dinleyeceği metin , Admin/SystemMaintenanceEvent veya .SystemMaintenanceEvent diye gidiyor dikkat!
-    // }      
 }
