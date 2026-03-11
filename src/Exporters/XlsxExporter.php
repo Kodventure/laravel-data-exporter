@@ -7,7 +7,7 @@ use Kodventure\LaravelDataExporter\Contracts\ExportSourceInterface;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 
-class XlsExporter extends BaseExporter
+class XlsxExporter extends BaseExporter
 {
     public function export(ExportSourceInterface $exportSource): ExportedFileDTO
     {
