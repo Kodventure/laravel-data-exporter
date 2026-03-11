@@ -2,8 +2,11 @@
 
 namespace Kodventure\LaravelDataExporter\Notifications;
 
+use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 use Illuminate\Foundation\Queue\Queueable;
+use Kodventure\LaravelDataExporter\DTO\ExportedFileDTO;
+use Kodventure\LaravelDataExporter\Enums\ExportFormat;
 
 class ExportReadyNotification extends Notification
 {
@@ -12,11 +15,33 @@ class ExportReadyNotification extends Notification
     /**
      * Create a new notification instance.
      */
-    public function __construct()
+    public function __construct(
+        public string $status,
+        public ?string $name = null,
+        public ?string $format = null,
+        public ?string $downloadUrl = null,
+        public ?string $temporaryUrl = null,
+        public ?int $size = null,
+    ) {}
+
+    public static function started(ExportFormat $format): self
     {
-        // public string $filename,
-        // public string $format,
-        // public string $downloadUrl // s3 linki gibi
+        return new self(
+            status: 'started',
+            format: $format->value,
+        );
+    }
+
+    public static function completed(ExportedFileDTO $exportedFile): self
+    {
+        return new self(
+            status: 'completed',
+            name: $exportedFile->name,
+            format: $exportedFile->format->value,
+            downloadUrl: $exportedFile->url,
+            temporaryUrl: $exportedFile->temporaryUrl,
+            size: $exportedFile->size,
+        );
     }
 
     /**
@@ -27,7 +52,6 @@ class ExportReadyNotification extends Notification
     public function via(object $notifiable): array
     {
         return ['database'];
-        return ['mail','database','broadcast'];
     }
 
     /**
@@ -35,11 +59,23 @@ class ExportReadyNotification extends Notification
      */
     public function toMail(object $notifiable): MailMessage
     {
-        return (new MailMessage)
-            ->subject(__('The export file is ready.'))
-            ->line(__('The export file is ready.'))
-            ->action(__('Download'), url('/'))
-            ->line(__('Thank you for using our application!'));
+        $subject = $this->status === 'started'
+            ? 'Export started'
+            : 'The export file is ready.';
+
+        $line = $this->status === 'started'
+            ? 'Your export request has been queued.'
+            : 'Your export file is ready for download.';
+
+        $mail = (new MailMessage)
+            ->subject($subject)
+            ->line($line);
+
+        if ($this->downloadUrl) {
+            $mail->action('Download', $this->downloadUrl);
+        }
+
+        return $mail;
     }
 
     /**
@@ -50,7 +86,17 @@ class ExportReadyNotification extends Notification
     public function toArray(object $notifiable): array
     {
         return [
-            //
+            'status' => $this->status,
+            'message' => $this->status === 'started'
+                ? 'Export started'
+                : 'Export completed',
+            'file' => [
+                'name' => $this->name,
+                'format' => $this->format,
+                'downloadUrl' => $this->downloadUrl,
+                'temporaryUrl' => $this->temporaryUrl,
+                'size' => $this->size,
+            ],
         ];
     }
 

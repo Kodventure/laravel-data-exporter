@@ -24,12 +24,19 @@ composer require kodventure/laravel-data-exporter
 ```php
 use App\Models\User;
 use Kodventure\LaravelDataExporter\Facades\DataExporter;
-use Kodventure\LaravelDataExporter\Support\Enums\ExportFormat;
+use Kodventure\LaravelDataExporter\Enums\ExportFormat;
+use Kodventure\LaravelDataExporter\Enums\ExportMode;
 
-DataExporter::for(User::query())
-    ->format(ExportFormat::CSV)
-    ->mode('all') // or 'page', 'selected'
-    ->export('users.csv');
+DataExporter::export(
+    source: User::query(),
+    mode: ExportMode::All, // ExportMode::Page | ExportMode::Selected
+    format: ExportFormat::CSV,
+    page: null,
+    perPage: null,
+    selectedIds: [],
+    user: auth()->user(), // Optional, for notifications
+    async: true,
+);
 ```
 
 ## 🔧 Advanced

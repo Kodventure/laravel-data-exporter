@@ -21,7 +21,7 @@ class ExportedFileDTO implements Arrayable
         return [
             'name' => $this->name,
             'path' => $this->path,
-            'format' => $this->format,
+            'format' => $this->format->value,
             'url' => $this->url,
             'temporaryUrl' => $this->temporaryUrl,
             'size' => $this->size,
@@ -33,7 +33,9 @@ class ExportedFileDTO implements Arrayable
         return new self(
             name: $data['name'],
             path: $data['path'],
-            format: $data['format'],
+            format: $data['format'] instanceof ExportFormat
+                ? $data['format']
+                : ExportFormat::from((string) $data['format']),
             url: $data['url'] ?? null,
             temporaryUrl: $data['temporaryUrl'] ?? null,
             size: $data['size'] ?? null

@@ -11,5 +11,9 @@ return [
     ],
     'files' => [
         'chunk_size' => 1000,
-    ]     
+    ],
+    'notifications' => [
+        // Allowed: none, started_only, completed_only, started_and_completed
+        'strategy' => getenv('DATA_EXPORTER_NOTIFICATION_STRATEGY') ?: 'started_and_completed',
+    ],
 ];
