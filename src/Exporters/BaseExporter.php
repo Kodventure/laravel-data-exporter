@@ -50,12 +50,20 @@ abstract class BaseExporter implements ExporterInterface
         Storage::disk($disk)->put($fullPath, $contents);
 
         $url = null;
+        $temporaryUrl = null;
         $size = null;
 
         try {
             $url = Storage::disk($disk)->url($fullPath);
         } catch (\Throwable) {
             $url = null;
+        }
+
+        try {
+            $ttl = (int) Config::get('data-exporter.storage.ttl_minutes', 30);
+            $temporaryUrl = Storage::disk($disk)->temporaryUrl($fullPath, now()->addMinutes($ttl));
+        } catch (\Throwable) {
+            $temporaryUrl = null;
         }
 
         try {
@@ -69,6 +77,7 @@ abstract class BaseExporter implements ExporterInterface
             path: $fullPath,
             format: $this->format,
             url: $url,
+            temporaryUrl: $temporaryUrl,
             size: $size,
         );
     }    

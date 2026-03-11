@@ -8,6 +8,7 @@ return [
     'storage' => [
         'disk' => 'public',
         'path' => 'exports',
+        'ttl_minutes' => 30, // temporary URL TTL in minutes
     ],
     'files' => [
         'chunk_size' => 1000,
