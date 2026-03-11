@@ -75,6 +75,15 @@ class ExportReadyNotification extends Notification implements ShouldBroadcast
     }
 
     /**
+     * `id` alanı kasıtlı olarak dahil edilmez.
+     * Toast kendi UUID'sini üretir → kapatılınca DB'deki bell notification'ı etkilemez.
+     */
+    public function broadcastWith(): array
+    {
+        return $this->toArray(new \stdClass());
+    }
+
+    /**
      * Filament notification bell compatibility.
      * Requires 'format' => 'filament' for Filament's DatabaseNotifications query filter.
      *
@@ -84,20 +93,22 @@ class ExportReadyNotification extends Notification implements ShouldBroadcast
     {
         if ($this->status === 'started') {
             return [
-                'format' => 'filament',
-                'title'  => 'Export started',
-                'body'   => 'Your export request has been queued. You will be notified when the file is ready.',
-                'status' => 'info',
+                'format'   => 'filament',
+                'title'    => 'Export started',
+                'body'     => 'Your export request has been queued. You will be notified when the file is ready.',
+                'status'   => 'info',
+                'duration' => 'persistent',
             ];
         }
 
         $url = $this->temporaryUrl ?? $this->downloadUrl;
 
         $data = [
-            'format' => 'filament',
-            'title'  => 'Export ready: ' . strtoupper((string) $this->format),
-            'body'   => 'Your export file is ready for download.' . ($this->name ? ' (' . $this->name . ')' : ''),
-            'status' => 'success',
+            'format'   => 'filament',
+            'title'    => 'Export ready: ' . strtoupper((string) $this->format),
+            'body'     => 'Your export file is ready for download.' . ($this->name ? ' (' . $this->name . ')' : ''),
+            'status'   => 'success',
+            'duration' => 'persistent',
         ];
 
         if ($url) {
